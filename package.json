@@ -1,0 +1,26 @@
+{
+  "name": "novel",
+  "version": "0.1.0",
+  "description": "Vim-style terminal novel reader",
+  "type": "module",
+  "bin": {
+    "novel": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "dev": "node esbuild.config.mjs --watch",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "iconv-lite": "^0.6.3",
+    "ink": "^5.0.0",
+    "react": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "esbuild": "^0.21.0",
+    "typescript": "^5.4.0"
+  }
+}
