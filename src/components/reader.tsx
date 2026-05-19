@@ -422,6 +422,9 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
         readingMode={readingMode}
         searchMatches={searchMatches.length}
         currentMatch={currentMatch + 1}
+        chapterIndex={currentChapterIdx + 1}
+        totalChapters={chapters.length}
+        chapterTitle={chapters[currentChapterIdx]?.title ?? ''}
       />
     </Box>
   );

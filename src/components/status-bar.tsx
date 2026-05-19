@@ -11,10 +11,14 @@ interface StatusBarProps {
   readingMode: ReadingMode;
   searchMatches: number;
   currentMatch: number;
+  chapterIndex: number;
+  totalChapters: number;
+  chapterTitle: string;
 }
 
 export default function StatusBar({
   progress, currentLine, totalLines, fileName, theme, readingMode, searchMatches, currentMatch,
+  chapterIndex, totalChapters, chapterTitle,
 }: StatusBarProps) {
   const progressBarWidth = 20;
   const filled = Math.round((progress / 100) * progressBarWidth);
@@ -26,12 +30,13 @@ export default function StatusBar({
     readingMode === 'help' ? 'HELP' : '';
 
   const searchInfo = searchMatches > 0 ? ` [${currentMatch}/${searchMatches}]` : '';
+  const chapterInfo = totalChapters > 1 ? ` [${chapterTitle}/${totalChapters}章]` : '';
 
   return (
     <Box flexDirection="column" width="100%" minWidth={80}>
       <Text color={theme.statusBarFg}>{'─'.repeat(80)}</Text>
       <Text backgroundColor={theme.statusBarBg} color={theme.statusBarFg}>
-        {` ${modeIndicator} ${fileName} [${bar}] ${progress}%  L${currentLine}/${totalLines}${searchInfo}  :help | :q | j/k ↓↑`}
+        {` ${modeIndicator} ${fileName}${chapterInfo} [${bar}] ${progress}%  L${currentLine}/${totalLines}${searchInfo}  :help | :q | j/k ↓↑`}
       </Text>
     </Box>
   );
