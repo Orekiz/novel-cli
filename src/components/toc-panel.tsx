@@ -1,0 +1,120 @@
+import React, { useState, useMemo } from 'react';
+import { Box, Text, useInput } from 'ink';
+import { Chapter } from '../types.js';
+import { useTheme } from '../hooks/use-theme.js';
+
+interface TocPanelProps {
+  chapters: Chapter[];
+  currentChapterIdx: number;
+  onSelect: (chapterIdx: number) => void;
+  onClose: () => void;
+}
+
+export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClose }: TocPanelProps) {
+  const { theme } = useTheme();
+  const [mode, setMode] = useState<'browse' | 'search'>('browse');
+  const [selectedIdx, setSelectedIdx] = useState(currentChapterIdx);
+  const [searchInput, setSearchInput] = useState('');
+
+  const filteredChapters = useMemo(() => {
+    if (!searchInput.trim()) return chapters;
+    const q = searchInput.toLowerCase();
+    return chapters.filter(ch => ch.title.toLowerCase().includes(q));
+  }, [chapters, searchInput]);
+
+  const displayList = filteredChapters.length > 0 ? filteredChapters : chapters;
+  const safeSelectedIdx = Math.min(selectedIdx, displayList.length - 1);
+
+  useInput((input, key) => {
+    if (mode === 'search') {
+      if (key.escape) {
+        setMode('browse');
+        setSearchInput('');
+        return;
+      }
+      if (key.return) {
+        if (filteredChapters.length > 0) {
+          const targetIdx = filteredChapters[Math.min(selectedIdx, filteredChapters.length - 1)].index;
+          onSelect(targetIdx);
+        }
+        return;
+      }
+      if (key.backspace || key.delete) {
+        setSearchInput(prev => prev.slice(0, -1));
+        return;
+      }
+      if (input && !key.ctrl && !key.meta) {
+        setSearchInput(prev => prev + input);
+        setSelectedIdx(0);
+      }
+      return;
+    }
+
+    // Browse mode
+    if (key.escape) { onClose(); return; }
+    if (key.upArrow || input === 'k') {
+      setSelectedIdx(prev => Math.max(0, prev - 1));
+      return;
+    }
+    if (key.downArrow || input === 'j') {
+      setSelectedIdx(prev => Math.min(displayList.length - 1, prev + 1));
+      return;
+    }
+    if (key.return) {
+      onSelect(displayList[safeSelectedIdx].index);
+      return;
+    }
+    if (input === '/') {
+      setMode('search');
+      setSearchInput('');
+      return;
+    }
+  });
+
+  const indicatorColor = theme.highlight || 'cyan';
+
+  return (
+    <Box flexDirection="column" padding={1} borderStyle="round">
+      <Box marginBottom={1}>
+        <Text bold inverse> Table of Contents </Text>
+      </Box>
+
+      {mode === 'search' && (
+        <Box marginBottom={1}>
+          <Text bold color="cyan">/</Text>
+          <Text>{searchInput || 'Search chapters...'}</Text>
+          <Text dimColor>  (Esc to cancel)</Text>
+        </Box>
+      )}
+
+      <Box flexDirection="column" marginBottom={1}>
+        {displayList.map((ch, idx) => {
+          const isCurrent = ch.index === currentChapterIdx;
+          const isSelected = idx === safeSelectedIdx;
+          const prefix = isSelected ? '▸ ' : '  ';
+          const suffix = isCurrent ? '  ←' : '';
+          return (
+            <Box key={ch.index}>
+              <Text color={isSelected ? indicatorColor : undefined}>
+                {prefix}
+              </Text>
+              <Text bold={isCurrent} color={isSelected ? indicatorColor : undefined}>
+                {ch.title}
+              </Text>
+              <Text dimColor>{suffix}</Text>
+            </Box>
+          );
+        })}
+        {filteredChapters.length === 0 && searchInput.trim() && (
+          <Text dimColor>  No matching chapters</Text>
+        )}
+      </Box>
+
+      <Text dimColor>
+        {mode === 'browse'
+          ? 'j/k navigate · / search · Enter select · Esc close'
+          : 'Type to search · Enter confirm · Esc cancel'}
+      </Text>
+    </Box>
+  );
+}

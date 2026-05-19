@@ -87,6 +87,9 @@ const defaultKeyBindings: KeyBindings = {
   escape: ['escape'],
   addBookmark: ['m'],
   jumpBookmark: ['`'],
+  openToc: ['t'],
+  prevChapter: ['['],
+  nextChapter: [']'],
 };
 
 export function getKeyBindings(): KeyBindings {
