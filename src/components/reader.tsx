@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
 import { useFile } from '../hooks/use-file.js';
 import { useTheme } from '../hooks/use-theme.js';
@@ -98,20 +98,25 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     }
   }, [fileResult, fileLoaded, visualLineCounts, viewerHeight, chapters]);
 
-  // Save position on scroll
-  useEffect(() => {
-    if (!fileResult) return;
-    let logicalLine = chapterStartLine;
-    let accumulated = 0;
-    for (let i = chapterStartLine; i < chapterEndLine && i < visualLineCounts.length; i++) {
-      if (accumulated + visualLineCounts[i] > scrollOffset) break;
-      accumulated += visualLineCounts[i];
-      logicalLine = i + 1;
-    }
-    updateHistory(fileResult.filePath, logicalLine);
-  }, [scrollOffset, fileResult, visualLineCounts, chapterStartLine, chapterEndLine]);
-
   const halfPage = Math.max(1, Math.floor(viewerHeight * HALF_PAGE_FACTOR));
+
+  const saveCurrentPosition = useCallback(() => {
+    if (!fileResult) return;
+    let ll = chapterStartLine;
+    let acc = 0;
+    for (let i = chapterStartLine; i < chapterEndLine && i < visualLineCounts.length; i++) {
+      if (acc + visualLineCounts[i] > scrollOffset) break;
+      acc += visualLineCounts[i];
+      ll = i + 1;
+    }
+    updateHistory(fileResult.filePath, ll);
+  }, [fileResult, scrollOffset, visualLineCounts, chapterStartLine, chapterEndLine]);
+
+  // Save position on scroll and on unmount
+  useEffect(() => {
+    saveCurrentPosition();
+    return () => { saveCurrentPosition(); };
+  }, [saveCurrentPosition]);
 
   useInput((input, key) => {
     // --- Command mode ---
@@ -156,6 +161,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     // --- Normal mode ---
     // Esc in normal mode goes back to bookshelf
     if (key.escape) {
+      saveCurrentPosition();
       onGoBack();
       return;
     }
@@ -331,6 +337,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     const parsed = parseCommand(input);
     switch (parsed.action) {
       case 'quit':
+        saveCurrentPosition();
         process.exit(0);
         break;
       case 'open':
