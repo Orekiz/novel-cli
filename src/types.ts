@@ -1,6 +1,6 @@
 export type AppMode = 'bookshelf' | 'reading';
 
-export type ReadingMode = 'normal' | 'command' | 'search' | 'help';
+export type ReadingMode = 'normal' | 'command' | 'search' | 'help' | 'toc';
 
 export interface Theme {
   name: string;
@@ -9,6 +9,13 @@ export interface Theme {
   highlight: string;
   statusBarBg: string;
   statusBarFg: string;
+}
+
+export interface Chapter {
+  index: number;
+  title: string;
+  startLine: number;
+  endLine: number;
 }
 
 export interface RecentFile {
@@ -52,4 +59,7 @@ export interface KeyBindings {
   escape: string[];
   addBookmark: string[];
   jumpBookmark: string[];
+  openToc: string[];
+  prevChapter: string[];
+  nextChapter: string[];
 }
