@@ -384,13 +384,26 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
   return (
     <Box flexDirection="column" flexGrow={1} width="100%">
       <Box height={viewerHeight} overflowY="hidden">
-        <TextViewer
-          lines={visibleLines}
-          showLineNumbers={showLineNumbers}
-          highlightColor={theme.highlight}
-          searchMatches={searchMatches}
-          currentMatch={currentMatch}
-        />
+        {readingMode === 'toc' ? (
+          <TocPanel
+            chapters={chapters}
+            currentChapterIdx={currentChapterIdx}
+            onSelect={(idx) => {
+              setCurrentChapterIdx(idx);
+              setScrollOffset(0);
+              setReadingMode('normal');
+            }}
+            onClose={() => setReadingMode('normal')}
+          />
+        ) : (
+          <TextViewer
+            lines={visibleLines}
+            showLineNumbers={showLineNumbers}
+            highlightColor={theme.highlight}
+            searchMatches={searchMatches}
+            currentMatch={currentMatch}
+          />
+        )}
       </Box>
 
       {readingMode === 'search' && (
@@ -402,19 +415,6 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
       )}
 
       {readingMode === 'help' && <HelpPanel onClose={() => setReadingMode('normal')} />}
-
-      {readingMode === 'toc' && (
-        <TocPanel
-          chapters={chapters}
-          currentChapterIdx={currentChapterIdx}
-          onSelect={(idx) => {
-            setCurrentChapterIdx(idx);
-            setScrollOffset(0);
-            setReadingMode('normal');
-          }}
-          onClose={() => setReadingMode('normal')}
-        />
-      )}
 
       <StatusBar
         progress={progress}
