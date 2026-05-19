@@ -370,6 +370,9 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
       case 'encoding':
         if (parsed.args[0]) onSetEncoding(parsed.args[0]);
         break;
+      case 'toc':
+        setReadingMode('toc');
+        break;
     }
     setReadingMode('normal');
   };

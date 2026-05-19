@@ -1,5 +1,5 @@
 export interface ParsedCommand {
-  action: 'quit' | 'open' | 'goto' | 'search' | 'help' | 'theme' | 'encoding' | 'set' | 'unknown';
+  action: 'quit' | 'open' | 'goto' | 'search' | 'help' | 'theme' | 'encoding' | 'set' | 'toc' | 'unknown';
   args: string[];
   raw: string;
 }
@@ -32,6 +32,9 @@ export function parseCommand(input: string): ParsedCommand {
     case 'set':
       return { action: 'set', args: parts.slice(1), raw: trimmed };
 
+    case 'toc':
+      return { action: 'toc', args: [], raw: trimmed };
+
     default: {
       if (/^\d+$/.test(cmd)) {
         return { action: 'goto', args: [cmd], raw: trimmed };
@@ -46,7 +49,7 @@ export function parseCommand(input: string): ParsedCommand {
 
 export function getCompletions(input: string): string[] {
   const trimmed = input.startsWith(':') ? input.slice(1) : input;
-  const commands = ['q', 'quit', 'open', 'help', 'theme', 'encoding', 'set number'];
+  const commands = ['q', 'quit', 'open', 'help', 'toc', 'theme', 'encoding', 'set number'];
   if (!trimmed) return commands.map(c => `:${c}`);
   return commands.filter(c => c.startsWith(trimmed)).map(c => `:${c}`);
 }

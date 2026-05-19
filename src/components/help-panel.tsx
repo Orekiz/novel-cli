@@ -19,6 +19,8 @@ export default function HelpPanel({ onClose }: HelpPanelProps) {
     ['G', 'Go to end'],
     [':N', 'Go to line N'],
     ['n / N', 'Next / Previous search result'],
+    ['t', 'Open table of contents'],
+    ['[ / ]', 'Previous / Next chapter'],
     ['/', 'Search'],
     [':', 'Command mode'],
     ['Esc', 'Cancel / Close panel'],
