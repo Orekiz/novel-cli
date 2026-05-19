@@ -10,7 +10,9 @@ import StatusBar from './status-bar.js';
 import CommandBar from './command-bar.js';
 import SearchBar from './search-bar.js';
 import HelpPanel from './help-panel.js';
+import TocPanel from './toc-panel.js';
 import { ReadingMode } from '../types.js';
+import { parseChapters } from '../utils/chapter-parser.js';
 
 interface ReaderProps {
   filePath: string | null;
@@ -54,17 +56,39 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     [lines, contentWidth]
   );
   const totalVisualLines = visualLineCounts.reduce((a, b) => a + b, 0);
-  const maxOffset = Math.max(0, totalVisualLines - viewerHeight);
+  const chapters = useMemo(() => fileResult ? parseChapters(lines) : [], [lines, fileResult]);
+  const [currentChapterIdx, setCurrentChapterIdx] = useState(0);
+  const currentChapter = chapters[currentChapterIdx] || chapters[0];
+  const chapterStartLine = currentChapter?.startLine ?? 0;
+  const chapterEndLine = currentChapter?.endLine ?? lines.length;
+  const chapterVisualStart = visualLineCounts.slice(0, chapterStartLine).reduce((a, b) => a + b, 0);
+  const chapterVisualCount = visualLineCounts.slice(chapterStartLine, chapterEndLine).reduce((a, b) => a + b, 0);
+  const maxOffset = Math.max(0, chapterVisualCount - viewerHeight);
 
   // Load last position on file open
   useEffect(() => {
     if (fileResult && !fileLoaded) {
       const lastPos = getLastPosition(fileResult.filePath);
-      let visualPos = 0;
-      for (let i = 0; i < lastPos && i < visualLineCounts.length; i++) {
-        visualPos += visualLineCounts[i];
+
+      // Find which chapter contains lastPos, default to 0
+      let chapterIdx = 0;
+      for (let i = 0; i < chapters.length; i++) {
+        if (lastPos >= chapters[i].startLine && lastPos < chapters[i].endLine) {
+          chapterIdx = i;
+          break;
+        }
       }
-      setScrollOffset(Math.max(0, visualPos - Math.floor(viewerHeight / 3)));
+      setCurrentChapterIdx(chapterIdx);
+
+      // Compute scroll offset within chapter
+      const ch = chapters[chapterIdx];
+      if (ch) {
+        const startVisual = visualLineCounts.slice(0, ch.startLine).reduce((a, b) => a + b, 0);
+        const chVisualCount = visualLineCounts.slice(ch.startLine, ch.endLine).reduce((a, b) => a + b, 0);
+        const posVisual = visualLineCounts.slice(0, lastPos).reduce((a, b) => a + b, 0) - startVisual;
+        setScrollOffset(Math.max(0, Math.min(posVisual - Math.floor(viewerHeight / 3), chVisualCount - viewerHeight)));
+      }
+
       setFileLoaded(true);
 
       const bookmarks = getBookmarks();
@@ -72,20 +96,20 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
         setBookmarkLine(bookmarks[fileResult.filePath]);
       }
     }
-  }, [fileResult, fileLoaded, visualLineCounts, viewerHeight]);
+  }, [fileResult, fileLoaded, visualLineCounts, viewerHeight, chapters]);
 
   // Save position on scroll
   useEffect(() => {
     if (!fileResult) return;
-    let logicalLine = 0;
+    let logicalLine = chapterStartLine;
     let accumulated = 0;
-    for (let i = 0; i < visualLineCounts.length; i++) {
+    for (let i = chapterStartLine; i < chapterEndLine && i < visualLineCounts.length; i++) {
       if (accumulated + visualLineCounts[i] > scrollOffset) break;
       accumulated += visualLineCounts[i];
       logicalLine = i + 1;
     }
     updateHistory(fileResult.filePath, logicalLine);
-  }, [scrollOffset, fileResult, visualLineCounts]);
+  }, [scrollOffset, fileResult, visualLineCounts, chapterStartLine, chapterEndLine]);
 
   const halfPage = Math.max(1, Math.floor(viewerHeight * HALF_PAGE_FACTOR));
 
@@ -117,6 +141,9 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
       }
       return;
     }
+
+    // --- TOC mode (input handled by TocPanel) ---
+    if (readingMode === 'toc') { return; }
 
     // --- Help mode ---
     if (readingMode === 'help') {
@@ -167,18 +194,34 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     if (input === 'n' && searchMatches.length > 0) {
       const nextIdx = (currentMatch + 1) % searchMatches.length;
       setCurrentMatch(nextIdx);
-      const matchLine = searchMatches[nextIdx];
-      const visualOffset = visualLineCounts.slice(0, matchLine).reduce((a, b) => a + b, 0);
-      setScrollOffset(Math.max(0, Math.min(visualOffset, maxOffset)));
+      jumpToLine(searchMatches[nextIdx]);
       return;
     }
     // Search prev
     if (input === 'N' && searchMatches.length > 0) {
       const prevIdx = (currentMatch - 1 + searchMatches.length) % searchMatches.length;
       setCurrentMatch(prevIdx);
-      const matchLine = searchMatches[prevIdx];
-      const visualOffset = visualLineCounts.slice(0, matchLine).reduce((a, b) => a + b, 0);
-      setScrollOffset(Math.max(0, Math.min(visualOffset, maxOffset)));
+      jumpToLine(searchMatches[prevIdx]);
+      return;
+    }
+    // TOC
+    if (input === 't') { setReadingMode('toc'); return; }
+    // Previous chapter
+    if (input === '[') {
+      setCurrentChapterIdx(prev => {
+        const next = Math.max(0, prev - 1);
+        setScrollOffset(0);
+        return next;
+      });
+      return;
+    }
+    // Next chapter
+    if (input === ']') {
+      setCurrentChapterIdx(prev => {
+        const next = Math.min(chapters.length - 1, prev + 1);
+        setScrollOffset(0);
+        return next;
+      });
       return;
     }
     // Enter command mode
@@ -211,7 +254,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
   const visibleLines = useMemo(() => {
     const result: { text: string; logicalLine: number; isHighlighted: boolean }[] = [];
     let visualRow = 0;
-    for (let i = 0; i < lines.length; i++) {
+    for (let i = chapterStartLine; i < chapterEndLine && i < lines.length; i++) {
       const wrapped = wrapLine(lines[i], contentWidth);
       for (let w = 0; w < wrapped.length; w++) {
         if (visualRow >= scrollOffset && visualRow < scrollOffset + viewerHeight) {
@@ -227,19 +270,45 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
       if (visualRow > scrollOffset + viewerHeight) break;
     }
     return result;
-  }, [lines, scrollOffset, viewerHeight, contentWidth, searchMatches]);
+  }, [lines, chapterStartLine, chapterEndLine, scrollOffset, viewerHeight, contentWidth, searchMatches]);
 
   // Current line for status bar
   const currentLine = (() => {
     let acc = 0;
-    for (let i = 0; i < visualLineCounts.length; i++) {
+    for (let i = chapterStartLine; i < chapterEndLine && i < visualLineCounts.length; i++) {
       if (acc + visualLineCounts[i] > scrollOffset) return i + 1;
       acc += visualLineCounts[i];
     }
-    return lines.length;
+    return chapterEndLine;
   })();
 
-  const progress = lines.length > 0 ? Math.round((currentLine / lines.length) * 100) : 0;
+  const progress = chapters.length > 0
+    ? Math.round(((currentChapterIdx + 1) / chapters.length) * 100)
+    : 0;
+
+  const jumpToLine = (line: number) => {
+    // Find which chapter contains this line and scroll there
+    let targetChapter = 0;
+    for (let i = 0; i < chapters.length; i++) {
+      if (line >= chapters[i].startLine && line < chapters[i].endLine) {
+        targetChapter = i;
+        break;
+      }
+    }
+    // If match is past end of current chapter's range, pin to last chapter
+    if (line >= lines.length) {
+      targetChapter = chapters.length - 1;
+    }
+    setCurrentChapterIdx(targetChapter);
+    const ch = chapters[targetChapter];
+    if (ch) {
+      const startVisual = visualLineCounts.slice(0, ch.startLine).reduce((a, b) => a + b, 0);
+      const lineVisual = visualLineCounts.slice(0, line).reduce((a, b) => a + b, 0);
+      const offsetInChapter = lineVisual - startVisual;
+      const chVisualCount = visualLineCounts.slice(ch.startLine, ch.endLine).reduce((a, b) => a + b, 0);
+      setScrollOffset(Math.max(0, Math.min(offsetInChapter, chVisualCount - viewerHeight)));
+    }
+  };
 
   const handleSearch = (query: string) => {
     if (!query.trim()) { setReadingMode('normal'); return; }
@@ -253,8 +322,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     setSearchMatches(matches);
     setCurrentMatch(0);
     if (matches.length > 0) {
-      const visualOff = visualLineCounts.slice(0, matches[0]).reduce((a, b) => a + b, 0);
-      setScrollOffset(Math.max(0, Math.min(visualOff, maxOffset)));
+      jumpToLine(matches[0]);
     }
     setReadingMode('normal');
   };
@@ -274,8 +342,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
       case 'goto': {
         const targetLine = parseInt(parsed.args[0], 10) - 1;
         if (targetLine >= 0 && targetLine < lines.length) {
-          const visualOff = visualLineCounts.slice(0, targetLine).reduce((a, b) => a + b, 0);
-          setScrollOffset(Math.max(0, Math.min(visualOff, maxOffset)));
+          jumpToLine(targetLine);
         }
         break;
       }
@@ -291,8 +358,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
         setSearchMatches(matches);
         setCurrentMatch(0);
         if (matches.length > 0) {
-          const visualOff = visualLineCounts.slice(0, matches[0]).reduce((a, b) => a + b, 0);
-          setScrollOffset(Math.max(0, Math.min(visualOff, maxOffset)));
+          jumpToLine(matches[0]);
         }
         break;
       }
@@ -333,6 +399,19 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
       )}
 
       {readingMode === 'help' && <HelpPanel onClose={() => setReadingMode('normal')} />}
+
+      {readingMode === 'toc' && (
+        <TocPanel
+          chapters={chapters}
+          currentChapterIdx={currentChapterIdx}
+          onSelect={(idx) => {
+            setCurrentChapterIdx(idx);
+            setScrollOffset(0);
+            setReadingMode('normal');
+          }}
+          onClose={() => setReadingMode('normal')}
+        />
+      )}
 
       <StatusBar
         progress={progress}
