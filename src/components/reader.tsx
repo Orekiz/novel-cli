@@ -354,7 +354,9 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
         setReadingMode('toc');
         break;
     }
-    setReadingMode('normal');
+    if (parsed.action !== 'help' && parsed.action !== 'toc') {
+      setReadingMode('normal');
+    }
   };
 
   if (!fileResult) {
