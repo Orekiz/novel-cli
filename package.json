@@ -1,5 +1,5 @@
 {
-  "name": "novel",
+  "name": "novel-cli",
   "version": "0.1.0",
   "description": "Vim-style terminal novel reader",
   "type": "module",

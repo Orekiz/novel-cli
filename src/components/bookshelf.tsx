@@ -53,7 +53,7 @@ export default function Bookshelf({ onOpenFile, startInBrowse }: BookshelfProps)
   return (
     <Box flexDirection="column" flexGrow={1} padding={2} width="100%">
       <Box marginBottom={1}>
-        <Text bold inverse> Novel Reader - Bookshelf </Text>
+        <Text bold inverse> Novel Reader Cli - Bookshelf </Text>
       </Box>
 
       <Box>

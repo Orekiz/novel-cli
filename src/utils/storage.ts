@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { RecentFile, KeyBindings } from '../types.js';
 
-const DATA_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '', '.novel-reader');
+const DATA_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '', '.novel-cli');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 const BOOKMARKS_FILE = path.join(DATA_DIR, 'bookmarks.json');
 const KEYMAP_FILE = path.join(DATA_DIR, 'keymap.json');

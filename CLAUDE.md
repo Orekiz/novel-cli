@@ -36,7 +36,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Text wrapping is CJK-aware (Chinese/Japanese/Korean chars = 2 columns wide) — `src/utils/wrap-text.ts`
 - Scroll offset is in **visual line space**, not logical line space — `getVisualLineCount` precomputes how many visual rows each logical line occupies
 - Encoding detection: UTF-8 BOM sniffing + heuristic, with `iconv-lite` fallback for GBK — `src/utils/encoding.ts`
-- Persistence: `~/.novel-reader/{history,bookmarks,keymap}.json` — `src/utils/storage.ts`
+- Persistence: `~/.novel-cli/{history,bookmarks,keymap}.json` — `src/utils/storage.ts`
 - Themes defined as static objects in `src/themes/index.ts`, provided via React context in `src/hooks/use-theme.tsx`
 - Vim keybindings in `reader.tsx`: `j`/`k` (scroll), `Ctrl+d`/`Ctrl+u` (half page), `g`/`G` (start/end), `n`/`N` (search next/prev), `:` (command), `/` (search), `m`/`` ` `` (bookmarks)
 - Command parser supports: `:q`, `:open <path>`, `:help`, `:goto <line>`, `:search <text>`, `:set number`, `:encoding <utf-8|gbk>`, `:theme <name>`
