@@ -25,7 +25,8 @@ export default function StatusBar({
   const modeIndicator = readingMode === 'normal' ? 'NORMAL' :
     readingMode === 'command' ? 'CMD' :
     readingMode === 'search' ? 'SEARCH' :
-    readingMode === 'help' ? 'HELP' : '';
+    readingMode === 'help' ? 'HELP' :
+    readingMode === 'toc' ? 'TOC' : '';
 
   const searchInfo = searchMatches > 0 ? ` [${currentMatch}/${searchMatches}]` : '';
   const chapterInfo = totalChapters > 1 ? ` [${chapterTitle}/${totalChapters}章]` : '';
