@@ -3,7 +3,7 @@ import { Box, Text, useInput, useStdout } from 'ink';
 import { useFile } from '../hooks/use-file.js';
 import { useTheme } from '../hooks/use-theme.js';
 import { getVisualLineCount, wrapLine } from '../utils/wrap-text.js';
-import { updateHistory, getLastPosition, getBookmarks, setBookmark } from '../utils/storage.js';
+import { updateHistory, getLastProgress, getBookmarks, setBookmark } from '../utils/storage.js';
 import { parseCommand } from '../utils/commands.js';
 import TextViewer from './text-viewer.js';
 import StatusBar from './status-bar.js';
@@ -68,27 +68,16 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
   // Load last position on file open
   useEffect(() => {
     if (fileResult && !fileLoaded) {
-      const lastPos = getLastPosition(fileResult.filePath);
+      const lastProgress = getLastProgress(fileResult.filePath);
 
-      // Find which chapter contains lastPos, default to 0
-      let chapterIdx = 0;
-      for (let i = 0; i < chapters.length; i++) {
-        if (lastPos >= chapters[i].startLine && lastPos < chapters[i].endLine) {
-          chapterIdx = i;
-          break;
-        }
-      }
+      // Restore chapter from saved progress percentage
+      const chapterIdx = chapters.length > 0
+        ? Math.min(Math.max(0, Math.round((lastProgress / 100) * chapters.length) - 1), chapters.length - 1)
+        : 0;
       setCurrentChapterIdx(chapterIdx);
 
-      // Compute scroll offset within chapter
-      const ch = chapters[chapterIdx];
-      if (ch) {
-        const startVisual = visualLineCounts.slice(0, ch.startLine).reduce((a, b) => a + b, 0);
-        const chVisualCount = visualLineCounts.slice(ch.startLine, ch.endLine).reduce((a, b) => a + b, 0);
-        const posVisual = visualLineCounts.slice(0, lastPos).reduce((a, b) => a + b, 0) - startVisual;
-        setScrollOffset(Math.max(0, Math.min(posVisual - Math.floor(viewerHeight / 3), chVisualCount - viewerHeight)));
-      }
-
+      // Set scroll to top of the restored chapter
+      setScrollOffset(0);
       setFileLoaded(true);
 
       const bookmarks = getBookmarks();
@@ -101,16 +90,10 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
   const halfPage = Math.max(1, Math.floor(viewerHeight * HALF_PAGE_FACTOR));
 
   const saveCurrentPosition = useCallback(() => {
-    if (!fileResult) return;
-    let ll = chapterStartLine;
-    let acc = 0;
-    for (let i = chapterStartLine; i < chapterEndLine && i < visualLineCounts.length; i++) {
-      if (acc + visualLineCounts[i] > scrollOffset) break;
-      acc += visualLineCounts[i];
-      ll = i + 1;
-    }
-    updateHistory(fileResult.filePath, ll);
-  }, [fileResult, scrollOffset, visualLineCounts, chapterStartLine, chapterEndLine]);
+    if (!fileResult || chapters.length === 0) return;
+    const progress = Math.round(((currentChapterIdx + 1) / chapters.length) * 100);
+    updateHistory(fileResult.filePath, progress);
+  }, [fileResult, currentChapterIdx, chapters.length]);
 
   // Save position on scroll and on unmount
   useEffect(() => {

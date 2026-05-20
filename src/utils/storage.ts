@@ -33,13 +33,13 @@ export function getHistory(): RecentFile[] {
   return readJSON<RecentFile[]>(HISTORY_FILE, []);
 }
 
-export function updateHistory(filePath: string, lastPosition: number): void {
+export function updateHistory(filePath: string, lastProgress: number): void {
   const history = getHistory();
   const idx = history.findIndex(h => h.path === filePath);
   const entry: RecentFile = {
     path: filePath,
     name: path.basename(filePath),
-    lastPosition,
+    lastProgress,
     lastReadAt: new Date().toISOString(),
   };
   if (idx >= 0) {
@@ -50,9 +50,9 @@ export function updateHistory(filePath: string, lastPosition: number): void {
   writeJSON(HISTORY_FILE, history.slice(0, 20));
 }
 
-export function getLastPosition(filePath: string): number {
+export function getLastProgress(filePath: string): number {
   const history = getHistory();
-  return history.find(h => h.path === filePath)?.lastPosition ?? 0;
+  return history.find(h => h.path === filePath)?.lastProgress ?? 0;
 }
 
 // --- Bookmarks ---

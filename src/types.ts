@@ -21,7 +21,7 @@ export interface Chapter {
 export interface RecentFile {
   path: string;
   name: string;
-  lastPosition: number;
+  lastProgress: number;  // 0-100 percentage based on chapters read
   lastReadAt: string;
 }
 

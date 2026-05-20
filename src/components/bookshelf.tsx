@@ -62,7 +62,7 @@ export default function Bookshelf({ onOpenFile, startInBrowse }: BookshelfProps)
         </Text>
         <Text bold={selectedIdx === 0}>
           {recentFiles.length > 0
-            ? `▶ Resume "${recentFiles[0].name}" (${recentFiles[0].lastPosition} lines in)`
+            ? `▶ Resume "${recentFiles[0].name}" (${recentFiles[0].lastProgress}%)`
             : '▶ Open a file'}
         </Text>
       </Box>
@@ -78,7 +78,7 @@ export default function Bookshelf({ onOpenFile, startInBrowse }: BookshelfProps)
                   {selectedIdx === optionIdx ? '▸ ' : '  '}
                 </Text>
                 <Text>{file.name}</Text>
-                <Text dimColor> — {file.lastPosition} lines</Text>
+                <Text dimColor> — {file.lastProgress}%</Text>
               </Box>
             );
           })}
