@@ -4,8 +4,6 @@ import { Theme, ReadingMode } from '../types.js';
 
 interface StatusBarProps {
   progress: number;
-  currentLine: number;
-  totalLines: number;
   fileName: string;
   theme: Theme;
   readingMode: ReadingMode;
@@ -17,7 +15,7 @@ interface StatusBarProps {
 }
 
 export default function StatusBar({
-  progress, currentLine, totalLines, fileName, theme, readingMode, searchMatches, currentMatch,
+  progress, fileName, theme, readingMode, searchMatches, currentMatch,
   chapterIndex, totalChapters, chapterTitle,
 }: StatusBarProps) {
   const progressBarWidth = 20;
@@ -36,7 +34,7 @@ export default function StatusBar({
     <Box flexDirection="column" width="100%" minWidth={80}>
       <Text color={theme.statusBarFg}>{'─'.repeat(80)}</Text>
       <Text backgroundColor={theme.statusBarBg} color={theme.statusBarFg}>
-        {` ${modeIndicator} ${fileName}${chapterInfo} [${bar}] ${progress}%  L${currentLine}/${totalLines}${searchInfo}  :help | :q | j/k ↓↑`}
+        {` ${modeIndicator} ${fileName}${chapterInfo} [${bar}] ${progress}%${searchInfo}  :help | :q | j/k ↓↑`}
       </Text>
     </Box>
   );

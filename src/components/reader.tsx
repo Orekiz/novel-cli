@@ -261,16 +261,6 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     return result;
   }, [lines, chapterStartLine, chapterEndLine, scrollOffset, viewerHeight, contentWidth, searchMatches]);
 
-  // Current line for status bar
-  const currentLine = (() => {
-    let acc = 0;
-    for (let i = chapterStartLine; i < chapterEndLine && i < visualLineCounts.length; i++) {
-      if (acc + visualLineCounts[i] > scrollOffset) return i + 1;
-      acc += visualLineCounts[i];
-    }
-    return chapterEndLine;
-  })();
-
   const progress = chapters.length > 0
     ? Math.round(((currentChapterIdx + 1) / chapters.length) * 100)
     : 0;
@@ -408,8 +398,6 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
 
       <StatusBar
         progress={progress}
-        currentLine={currentLine}
-        totalLines={lines.length}
         fileName={fileResult.fileName}
         theme={theme}
         readingMode={readingMode}
