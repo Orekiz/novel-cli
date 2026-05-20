@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import path from 'node:path';
 import { readFileLines, Encoding } from '../utils/encoding.js';
 
 export interface FileResult {
@@ -16,7 +17,7 @@ export function useFile(filePath: string | null, encoding?: Encoding): FileResul
       const lines = readFileLines(filePath, enc);
       return {
         lines,
-        fileName: filePath.split('/').pop() || filePath,
+        fileName: path.basename(filePath, path.extname(filePath)),
         filePath,
         encoding: enc || 'utf-8',
       };

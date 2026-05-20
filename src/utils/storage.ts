@@ -38,7 +38,7 @@ export function updateHistory(filePath: string, lastProgress: number): void {
   const idx = history.findIndex(h => h.path === filePath);
   const entry: RecentFile = {
     path: filePath,
-    name: path.basename(filePath),
+    name: path.basename(filePath, path.extname(filePath)),
     lastProgress,
     lastReadAt: new Date().toISOString(),
   };
