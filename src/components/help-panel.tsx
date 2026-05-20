@@ -5,35 +5,30 @@ interface HelpPanelProps {
   onClose: () => void;
 }
 
+const shortcuts = [
+  ['j/↓', 'scroll down'],
+  ['k/↑', 'scroll up'],
+  ['Ctrl+d/PgDn', 'half page down'],
+  ['Ctrl+u/PgUp', 'half page up'],
+  ['g / G', 'chapter start/end'],
+  ['[ / ]', 'prev/next chapter'],
+  ['t / :toc', 'table of contents'],
+  ['/', 'search (n/N next/prev)'],
+  [':123', 'go to line'],
+  ['m / `', 'bookmark / jump'],
+  ['Esc', 'cancel / close'],
+  [':q', 'quit'],
+  [':help', 'this panel'],
+  [':open <path>', 'open file'],
+  [':theme <name>', 'switch theme'],
+  [':encoding <name>', 'set encoding'],
+  [':set number', 'toggle line numbers'],
+];
+
 export default function HelpPanel({ onClose }: HelpPanelProps) {
   useInput((input, key) => {
-    if (key.escape || input === 'q') onClose();
+    if (key.escape) onClose();
   });
-
-  const shortcuts = [
-    ['j / ↓', 'Scroll down'],
-    ['k / ↑', 'Scroll up'],
-    ['Ctrl+d / PgDn', 'Half page down'],
-    ['Ctrl+u / PgUp', 'Half page up'],
-    ['g / G', 'Chapter start / end'],
-    [':123 / :goto N', 'Go to line N'],
-    ['n / N', 'Next / Previous search result'],
-    ['t / :toc', 'Open table of contents'],
-    ['[ / ]', 'Previous / Next chapter'],
-    ['/', 'Search'],
-    [':', 'Enter command mode'],
-    ['Esc', 'Cancel / Close panel'],
-    ['m / `', 'Set bookmark / Jump to bookmark'],
-    ['', ''],
-    ['Commands', ''],
-    [':q', 'Quit'],
-    [':open <path>', 'Open file'],
-    [':help', 'Show this help'],
-    [':toc', 'Open table of contents'],
-    [':theme <name>', 'Switch theme'],
-    [':encoding <name>', 'Set encoding'],
-    [':set number', 'Toggle line numbers'],
-  ];
 
   return (
     <Box flexDirection="column" padding={1} borderStyle="round">
@@ -41,13 +36,19 @@ export default function HelpPanel({ onClose }: HelpPanelProps) {
       <Box flexDirection="column" marginTop={1}>
         {shortcuts.map(([key, desc], idx) => (
           <Box key={idx}>
-            <Box width={20}><Text bold>{key}</Text></Box>
-            <Text>{desc}</Text>
+            {desc ? (
+              <>
+                <Box width={16}><Text bold>{key}</Text></Box>
+                <Text dimColor>{desc}</Text>
+              </>
+            ) : (
+              <Text> </Text>
+            )}
           </Box>
         ))}
       </Box>
-      <Box marginTop={1}>
-        <Text dimColor>Press Esc or q to close</Text>
+      <Box>
+        <Text dimColor>Esc to close</Text>
       </Box>
     </Box>
   );
