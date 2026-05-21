@@ -34,4 +34,16 @@
 - Added Chinese and English README files.
 - Added MIT License.
 
+## [0.2.1] - 2026-05-21
+
+### Fixed
+
+- **TOC panel chapter list clipped** — TocPanel now maintains an internal scroll offset (`listOffset`) and only renders the visible subset of chapters. Long chapter lists can be navigated with `j`/`k` scrolling.
+- **TOC opens at wrong position** — On open, the panel now scrolls to center the current reading chapter in the visible area instead of always starting from page one.
+- **Help panel squeezed reading area** — HelpPanel now renders inside the viewer area (replacing the text view) instead of below it, preventing layout overflow.
+- **`:help` command not opening help panel** — `handleCommand` no longer unconditionally resets the reading mode after `:help` and `:toc` actions.
+- **`q` key closing help panel** — HelpPanel now only responds to `Esc` for closing; `q` is left unused in help mode.
+- **Help panel text inaccuracies** — Updated command descriptions and hint text to reflect current features.
+
 [0.2.0]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.0
+[0.2.1]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.1
