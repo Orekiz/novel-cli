@@ -8,13 +8,22 @@ interface TocPanelProps {
   currentChapterIdx: number;
   onSelect: (chapterIdx: number) => void;
   onClose: () => void;
+  maxHeight: number;
 }
 
-export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClose }: TocPanelProps) {
+const HEADER_LINES = 8; // border top + padding top + title + title margin + list margin + hint + padding bottom + border bottom
+const SEARCH_LINES = 2; // search input line + marginBottom
+
+export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClose, maxHeight }: TocPanelProps) {
   const { theme } = useTheme();
   const [mode, setMode] = useState<'browse' | 'search'>('browse');
   const [selectedIdx, setSelectedIdx] = useState(currentChapterIdx);
   const [searchInput, setSearchInput] = useState('');
+  const [listOffset, setListOffset] = useState(() => {
+    const visible = maxHeight - HEADER_LINES;
+    const target = currentChapterIdx - Math.floor(visible / 2);
+    return Math.max(0, Math.min(target, Math.max(0, chapters.length - visible)));
+  });
 
   const filteredChapters = useMemo(() => {
     if (!searchInput.trim()) return chapters;
@@ -24,6 +33,7 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
 
   const displayList = filteredChapters.length > 0 ? filteredChapters : chapters;
   const safeSelectedIdx = Math.min(selectedIdx, displayList.length - 1);
+  const visibleLines = maxHeight - HEADER_LINES - (mode === 'search' ? SEARCH_LINES : 0);
 
   useInput((input, key) => {
     if (mode === 'search') {
@@ -46,6 +56,7 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
       if (input && !key.ctrl && !key.meta) {
         setSearchInput(prev => prev + input);
         setSelectedIdx(0);
+        setListOffset(0);
       }
       return;
     }
@@ -53,11 +64,23 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
     // Browse mode
     if (key.escape) { onClose(); return; }
     if (key.upArrow || input === 'k') {
-      setSelectedIdx(prev => Math.max(0, prev - 1));
+      setSelectedIdx(prev => {
+        const next = Math.max(0, prev - 1);
+        if (next < listOffset) {
+          setListOffset(next);
+        }
+        return next;
+      });
       return;
     }
     if (key.downArrow || input === 'j') {
-      setSelectedIdx(prev => Math.min(displayList.length - 1, prev + 1));
+      setSelectedIdx(prev => {
+        const next = Math.min(displayList.length - 1, prev + 1);
+        if (next >= listOffset + visibleLines) {
+          setListOffset(next - visibleLines + 1);
+        }
+        return next;
+      });
       return;
     }
     if (key.return) {
@@ -67,16 +90,21 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
     if (input === '/') {
       setMode('search');
       setSearchInput('');
+      setListOffset(0);
       return;
     }
   });
 
   const indicatorColor = theme.highlight || 'cyan';
+  const visibleChapters = displayList.slice(listOffset, listOffset + visibleLines);
 
   return (
     <Box flexDirection="column" padding={1} borderStyle="round">
       <Box marginBottom={1}>
         <Text bold inverse> Table of Contents </Text>
+        {displayList.length > visibleLines && (
+          <Text dimColor>  ({listOffset + 1}-{Math.min(listOffset + visibleLines, displayList.length)}/{displayList.length})</Text>
+        )}
       </Box>
 
       {mode === 'search' && (
@@ -88,9 +116,10 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
       )}
 
       <Box flexDirection="column" marginBottom={1}>
-        {displayList.map((ch, idx) => {
+        {visibleChapters.map((ch, idx) => {
+          const actualIdx = listOffset + idx;
           const isCurrent = ch.index === currentChapterIdx;
-          const isSelected = idx === safeSelectedIdx;
+          const isSelected = actualIdx === safeSelectedIdx;
           const prefix = isSelected ? '▸ ' : '  ';
           const suffix = isCurrent ? '  ←' : '';
           return (
