@@ -135,7 +135,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
 
     // --- Help mode ---
     if (readingMode === 'help') {
-      if (key.escape || input === 'q') {
+      if (key.escape) {
         setReadingMode('normal');
       }
       return;
@@ -376,7 +376,10 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
               setReadingMode('normal');
             }}
             onClose={() => setReadingMode('normal')}
+            maxHeight={viewerHeight}
           />
+        ) : readingMode === 'help' ? (
+          <HelpPanel onClose={() => setReadingMode('normal')} />
         ) : (
           <TextViewer
             lines={visibleLines}
@@ -395,8 +398,6 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
       {readingMode === 'command' && (
         <CommandBar input={commandInput} />
       )}
-
-      {readingMode === 'help' && <HelpPanel onClose={() => setReadingMode('normal')} />}
 
       <StatusBar
         progress={progress}
