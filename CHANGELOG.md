@@ -46,4 +46,11 @@
 - **Help panel text inaccuracies** — Updated command descriptions and hint text to reflect current features.
 
 [0.2.0]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.0
+## [0.2.2] - 2026-05-21
+
+### Fixed
+
+- **TOC search results not navigable** — Search mode now responds to `↑`/`↓` to navigate the filtered chapter list, with proper scroll offset tracking for long result sets. Hint text updated to reflect the new controls.
+
 [0.2.1]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.1
+[0.2.2]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.2
