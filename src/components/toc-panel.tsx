@@ -44,13 +44,29 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
       }
       if (key.return) {
         if (filteredChapters.length > 0) {
-          const targetIdx = filteredChapters[Math.min(selectedIdx, filteredChapters.length - 1)].index;
+          const targetIdx = filteredChapters[Math.min(safeSelectedIdx, filteredChapters.length - 1)].index;
           onSelect(targetIdx);
         }
         return;
       }
       if (key.backspace || key.delete) {
         setSearchInput(prev => prev.slice(0, -1));
+        return;
+      }
+      if (key.upArrow) {
+        setSelectedIdx(prev => {
+          const next = Math.max(0, prev - 1);
+          if (next < listOffset) setListOffset(next);
+          return next;
+        });
+        return;
+      }
+      if (key.downArrow) {
+        setSelectedIdx(prev => {
+          const next = Math.min(displayList.length - 1, prev + 1);
+          if (next >= listOffset + visibleLines) setListOffset(next - visibleLines + 1);
+          return next;
+        });
         return;
       }
       if (input && !key.ctrl && !key.meta) {
@@ -142,7 +158,7 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
       <Text dimColor>
         {mode === 'browse'
           ? 'j/k navigate · / search · Enter select · Esc close'
-          : 'Type to search · Enter confirm · Esc cancel'}
+          : '↑/↓ navigate · Type to filter · Enter select · Esc cancel'}
       </Text>
     </Box>
   );
