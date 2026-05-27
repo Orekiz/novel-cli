@@ -52,6 +52,18 @@
 
 - **TOC search results not navigable** — Search mode now responds to `↑`/`↓` to navigate the filtered chapter list, with proper scroll offset tracking for long result sets. Hint text updated to reflect the new controls.
 
+## [0.2.3] - 2026-05-22
+
+### Fixed
+
+- **Chapter detection for large chapter numbers** — Added missing Chinese numerals `千` (thousand), `万` (ten thousand), and `两` (alternative two) to the chapter heading pattern. Titles like "第一千章" and "第两千章" are now correctly recognized.
+- **Bookshelf exit key** — Changed from `Esc` to `q`. Esc is reserved for back navigation; `q` now exits as indicated by the on-screen hint.
+
+### Build
+
+- **Type checking before build** — Added `npx tsc --noEmit` step to the build script, ensuring type errors are caught before bundling.
+
 [0.2.0]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.0
 [0.2.1]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.1
 [0.2.2]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.2
+[0.2.3]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.3
