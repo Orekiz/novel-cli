@@ -1,7 +1,7 @@
 import { Chapter } from '../types.js';
 
 // Pattern 1: 第X章/节/回/卷 (Chapter/Section/Volume with Chinese numerals)
-const CHAPTER_PATTERN = /^第[一二三四五六七八九十百零〇\d]+[章节回卷]/;
+const CHAPTER_PATTERN = /^第[一二两三四五六七八九十百千万零〇\d]+[章节回卷]/;
 
 // Pattern 2: Numbered title (e.g. "001 引子", "1.标题", "02 开始")
 const NUMBERED_TITLE_PATTERN = /^\d+[.、．\s]+/;
