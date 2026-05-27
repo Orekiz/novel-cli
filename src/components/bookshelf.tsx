@@ -20,7 +20,7 @@ export default function Bookshelf({ onOpenFile, startInBrowse }: BookshelfProps)
   useInput((input, key) => {
     // When browser is shown, let FileBrowser handle input instead
     if (showBrowser) return;
-    if (key.escape) { process.exit(0); }
+    if (input === 'q') { process.exit(0); }
     if (key.upArrow || input === 'k') {
       setSelectedIdx(prev => Math.max(0, prev - 1));
     }
