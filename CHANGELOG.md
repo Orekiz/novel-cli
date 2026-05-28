@@ -52,7 +52,7 @@
 
 - **TOC search results not navigable** — Search mode now responds to `↑`/`↓` to navigate the filtered chapter list, with proper scroll offset tracking for long result sets. Hint text updated to reflect the new controls.
 
-## [0.2.3] - 2026-05-22
+## [0.2.3] - 2026-05-27
 
 ### Fixed
 
