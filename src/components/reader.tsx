@@ -12,7 +12,6 @@ import SearchBar from './search-bar.js';
 import HelpPanel from './help-panel.js';
 import TocPanel from './toc-panel.js';
 import { ReadingMode } from '../types.js';
-import { parseChapters } from '../utils/chapter-parser.js';
 
 interface ReaderProps {
   filePath: string | null;
@@ -56,7 +55,7 @@ export default function Reader({ filePath, encoding, onGoBack, onOpenFile, onSet
     [lines, contentWidth]
   );
   const totalVisualLines = visualLineCounts.reduce((a, b) => a + b, 0);
-  const chapters = useMemo(() => fileResult ? parseChapters(lines) : [], [lines, fileResult]);
+  const chapters = fileResult?.chapters ?? [];
   const [currentChapterIdx, setCurrentChapterIdx] = useState(0);
   const currentChapter = chapters[currentChapterIdx] || chapters[0];
   const chapterStartLine = currentChapter?.startLine ?? 0;
