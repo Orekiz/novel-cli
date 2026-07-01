@@ -34,7 +34,7 @@ export default function FileBrowser({ onSelect, onCancel, initialDir }: FileBrow
         const fullPath = path.join(currentDir, item.name);
         if (item.isDirectory()) {
           dirList.push({ name: item.name, isDir: true, path: fullPath });
-        } else if (item.name.endsWith('.txt') || item.name.endsWith('.md')) {
+        } else if (item.name.endsWith('.txt') || item.name.endsWith('.md') || item.name.endsWith('.epub')) {
           fileList.push({ name: item.name, isDir: false, path: fullPath });
         }
       }
