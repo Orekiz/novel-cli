@@ -138,11 +138,13 @@ export default function TocPanel({ chapters, currentChapterIdx, onSelect, onClos
           const isSelected = actualIdx === safeSelectedIdx;
           const prefix = isSelected ? '▸ ' : '  ';
           const suffix = isCurrent ? '  ←' : '';
+          const indent = '  '.repeat(ch.depth ?? 0);
           return (
             <Box key={ch.index}>
               <Text color={isSelected ? indicatorColor : undefined}>
                 {prefix}
               </Text>
+              <Text dimColor>{indent}</Text>
               <Text bold={isCurrent} color={isSelected ? indicatorColor : undefined}>
                 {ch.title}
               </Text>
