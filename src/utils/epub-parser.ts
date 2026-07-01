@@ -69,12 +69,6 @@ export async function parseEpubFile(filePath: string): Promise<EpubResult> {
 
   const fileName = path.basename(filePath, path.extname(filePath));
 
-  // Build a lookup from manifest href (normalized) to manifest id
-  const hrefToId = new Map<string, string>();
-  for (const [id, item] of Object.entries(epub.manifest)) {
-    hrefToId.set(item.href, id);
-  }
-
   // Concatenate all spine items in order, tracking line ranges
   const allLines: string[] = [];
   const spineRanges: { id: string; startLine: number; endLine: number }[] = [];
@@ -98,7 +92,7 @@ export async function parseEpubFile(filePath: string): Promise<EpubResult> {
     // Build flat chapter list from TOC entries, preserving depth for indentation.
     // Each TOC entry is mapped to a spine range by matching href → id.
     chapters = epub.toc.map((tocEntry, i) => {
-      const id = tocEntry.id || hrefToId.get(tocEntry.href) || '';
+      const id = tocEntry.id || '';
       const range = spineRanges.find(r => r.id === id);
 
       return {
@@ -111,7 +105,7 @@ export async function parseEpubFile(filePath: string): Promise<EpubResult> {
     });
 
     // Filter out TOC entries that map to empty spine ranges (no content)
-    chapters = chapters.filter(ch => ch.endLine > ch.startLine || ch.startLine < allLines.length);
+    chapters = chapters.filter(ch => ch.endLine > ch.startLine);
 
     // Re-index after filtering
     chapters = chapters.map((ch, i) => ({ ...ch, index: i }));
