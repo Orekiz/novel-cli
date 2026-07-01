@@ -107,8 +107,13 @@ export async function parseEpubFile(filePath: string): Promise<EpubResult> {
     // Filter out TOC entries that map to empty spine ranges (no content)
     chapters = chapters.filter(ch => ch.endLine > ch.startLine);
 
-    // Re-index after filtering
-    chapters = chapters.map((ch, i) => ({ ...ch, index: i }));
+    // If TOC mapping produced no valid chapters, fall back to regex detection
+    if (chapters.length === 0) {
+      chapters = parseChapters(allLines);
+    } else {
+      // Re-index after filtering
+      chapters = chapters.map((ch, i) => ({ ...ch, index: i }));
+    }
   } else {
     // No TOC: use regex-based chapter detection on the full text
     chapters = parseChapters(allLines);
