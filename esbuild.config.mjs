@@ -7,7 +7,7 @@ const nodeBuiltins = builtinModules.flatMap(m => [m, `node:${m}`]);
 const external = [
   ...nodeBuiltins,
   'commander', 'iconv-lite', 'ink', 'react',
-  'epub', 'jszip', 'fast-xml-parser',
+  'epub',
 ];
 
 const config = {
