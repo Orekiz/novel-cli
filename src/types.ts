@@ -16,6 +16,7 @@ export interface Chapter {
   title: string;
   startLine: number;
   endLine: number;
+  depth?: number;  // 0-based nesting depth for TOC rendering (0 = top level)
 }
 
 export interface RecentFile {
