@@ -12,5 +12,8 @@ dist/
 .DS_Store
 Thumbs.db
 
+# CodeGraph index (auto-generated)
+.codegraph/
+
 # Test data / personal files
 jzc.txt
