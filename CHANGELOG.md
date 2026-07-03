@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.3.0] - 2026-07-03
+
+### Added
+
+- **EPUB format support** — Open and read `.epub` e-books alongside `.txt` and `.md` files. EPUB content is automatically extracted, HTML tags are stripped, and chapters are parsed from the book's built-in table of contents.
+- **Nested TOC display** — EPUB table of contents entries are rendered with indentation in the TOC panel based on nesting level.
+
+### Changed
+
+- **Parser architecture** — File reading is now delegated to a strategy-pattern parser layer (`parser.ts`) that dispatches by file extension. EPUB parsing is asynchronous; text files remain synchronous.
+- **Pre-parsed chapters** — Chapters are now computed by the parser layer and flow through `FileResult`, eliminating duplicate `parseChapters()` calls in the reader.
+
+## [0.2.3] - 2026-05-27
+
+### Fixed
+
+- **Chapter detection for large chapter numbers** — Added missing Chinese numerals `千` (thousand), `万` (ten thousand), and `两` (alternative two) to the chapter heading pattern. Titles like "第一千章" and "第两千章" are now correctly recognized.
+- **Bookshelf exit key** — Changed from `Esc` to `q`. Esc is reserved for back navigation; `q` now exits as indicated by the on-screen hint.
+
+### Build
+
+- **Type checking before build** — Added `npx tsc --noEmit` step to the build script, ensuring type errors are caught before bundling.
+
+## [0.2.2] - 2026-05-22
+
+### Fixed
+
+- **TOC search results not navigable** — Search mode now responds to `↑`/`↓` to navigate the filtered chapter list, with proper scroll offset tracking for long result sets. Hint text updated to reflect the new controls.
+
+## [0.2.1] - 2026-05-21
+
+### Fixed
+
+- **TOC panel chapter list clipped** — TocPanel now maintains an internal scroll offset (`listOffset`) and only renders the visible subset of chapters. Long chapter lists can be navigated with `j`/`k` scrolling.
+- **TOC opens at wrong position** — On open, the panel now scrolls to center the current reading chapter in the visible area instead of always starting from page one.
+- **Help panel squeezed reading area** — HelpPanel now renders inside the viewer area (replacing the text view) instead of below it, preventing layout overflow.
+- **`:help` command not opening help panel** — `handleCommand` no longer unconditionally resets the reading mode after `:help` and `:toc` actions.
+- **`q` key closing help panel** — HelpPanel now only responds to `Esc` for closing; `q` is left unused in help mode.
+- **Help panel text inaccuracies** — Updated command descriptions and hint text to reflect current features.
+
 ## [0.2.0] - 2026-05-20
 
 ### Added
@@ -34,36 +74,8 @@
 - Added Chinese and English README files.
 - Added MIT License.
 
-## [0.2.1] - 2026-05-21
-
-### Fixed
-
-- **TOC panel chapter list clipped** — TocPanel now maintains an internal scroll offset (`listOffset`) and only renders the visible subset of chapters. Long chapter lists can be navigated with `j`/`k` scrolling.
-- **TOC opens at wrong position** — On open, the panel now scrolls to center the current reading chapter in the visible area instead of always starting from page one.
-- **Help panel squeezed reading area** — HelpPanel now renders inside the viewer area (replacing the text view) instead of below it, preventing layout overflow.
-- **`:help` command not opening help panel** — `handleCommand` no longer unconditionally resets the reading mode after `:help` and `:toc` actions.
-- **`q` key closing help panel** — HelpPanel now only responds to `Esc` for closing; `q` is left unused in help mode.
-- **Help panel text inaccuracies** — Updated command descriptions and hint text to reflect current features.
-
-
-## [0.2.2] - 2026-05-22
-
-### Fixed
-
-- **TOC search results not navigable** — Search mode now responds to `↑`/`↓` to navigate the filtered chapter list, with proper scroll offset tracking for long result sets. Hint text updated to reflect the new controls.
-
-## [0.2.3] - 2026-05-27
-
-### Fixed
-
-- **Chapter detection for large chapter numbers** — Added missing Chinese numerals `千` (thousand), `万` (ten thousand), and `两` (alternative two) to the chapter heading pattern. Titles like "第一千章" and "第两千章" are now correctly recognized.
-- **Bookshelf exit key** — Changed from `Esc` to `q`. Esc is reserved for back navigation; `q` now exits as indicated by the on-screen hint.
-
-### Build
-
-- **Type checking before build** — Added `npx tsc --noEmit` step to the build script, ensuring type errors are caught before bundling.
-
-[0.2.0]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.0
-[0.2.1]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.1
-[0.2.2]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.2
+[0.3.0]: https://github.com/Orekiz/novel-cli/releases/tag/v0.3.0
 [0.2.3]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.3
+[0.2.2]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.2
+[0.2.1]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.1
+[0.2.0]: https://github.com/Orekiz/novel-cli/releases/tag/v0.2.0
